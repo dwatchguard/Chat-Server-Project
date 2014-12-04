@@ -5,6 +5,7 @@
 #include "user.h"
 #include "linked_list.h"
 #include "net_include.h"
+#include "lamp_stamp.h"
  
  //struct representing a chatroom
 typedef struct chatroom
@@ -14,7 +15,7 @@ typedef struct chatroom
 	llist *local_users;
 	llist *messages;
 	llist *pending_likes;
-	llist *pending_dislikes;
+	llist *pending_unlikes;
 } chatroom;
  
 chatroom* create_room(char* room_name);
@@ -26,8 +27,8 @@ void remove_local_user(chatroom *chat,user *leaver);
 llist* get_all_usernames(chatroom *chat);
 
 void add_message(chatroom * chat, packet command);
-void like_message_at(chatroom *chat, packet command);
-void unlike_message_at(chatroom *chat, packet command);
+int like_message_at(chatroom *chat, packet command);
+int unlike_message_at(chatroom *chat, packet command);
 char* get_history(chatroom *chat);
 char* get_entire_history(chatroom *chat);
 message* get_message(chatroom* chat, int message_number);

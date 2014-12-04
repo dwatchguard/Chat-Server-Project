@@ -28,6 +28,5 @@ void *pop(llist *list);
 bool list_has(llist *list, void *data, int data_size);
 void list_remove(llist *list, void *data, int data_size);
 void* index_at(llist *list, int index);
-int timeval_max(struct timeval_a, struct timeval_b);
 int max(int a, int b);
 #endif  /* LINKED_LIST_H */
