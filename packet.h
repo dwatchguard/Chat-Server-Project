@@ -5,13 +5,14 @@
 #include <time.h>
 
 #include "net_include.h"
+#include "lamp_stamp.h"
 
 typedef struct packet
 {
 	int packet_type;
     int machine_num;
 	int update_num;
-	struct timeval timestamp;
+	lamp_stamp timestamp;
     char payload[PAYLOAD];
 } packet;
 

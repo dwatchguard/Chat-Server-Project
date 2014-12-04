@@ -134,9 +134,7 @@ void sort_messages(chatroom *chat) {
             prev = temp->prev;
             message *temp_mess = (mess *) temp->ptr;
             message *temp_prev = (mess *) prev->ptr;
-            int mess_time = temp_mess->timeval.tv_sec*1000000 + temp_mess->timeval.tv_usec;
-            int prev_time = temp_prev->timeval.tv_sec*1000000 + temp_prev->timeval.tv_usec;
-            if (mess_time < prev_time) {
+            if (compare_stamp(temp_mess->lamp_stamp, temp_prev->lamp_stamp) < 0) {
                 node *temptemp = temp;
                 temp = prev;
                 prev = temptemp;

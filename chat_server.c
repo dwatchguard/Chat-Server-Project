@@ -64,6 +64,7 @@ static  int     To_exit = 0;
 
 static  int     machine_num;
 static  int     update_num = 0;
+static  int     lamp_counter = 0;
 static llist	*chatrooms;
 static llist	*users;	
 
@@ -202,7 +203,8 @@ static	char		 mess[MAX_MESSLEN];
             
             packet new_pack;
             new_pack.machine_num = machine_num;
-            gettimeofday(&new_pack.timestamp, NULL);
+            lamp_stamp ls; ls.machine_num = machine_num; ls.timestamp = ++lamp_counter;
+            new_pack.timestamp = ls;
             //new_pack.timestamp = time(NULL);
 			chatroom *room = get_chatroom(pack->room_name);
 			user temp_user;

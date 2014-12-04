@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-message *init_message(char *poster, char *line, int number, struct timeval timestamp) {
+message *init_message(char *poster, char *line, int number, lamp_stamp timestamp) {
 	message * temp = malloc(sizeof(message));
 	memcpy(temp->poster_name, poster, MAX_USERNAME_LEN);
     memcpy(temp->text, line, MAX_MESS_LEN);
@@ -37,9 +37,7 @@ void like_message(message* line, packet command) { //TODO: Add code to consider 
 			return;
 			}
 		} else {
-			if ((gotten_unlike->timestamp.tv_sec*1000000+gotten_unlike->timestamp.tv_usec)
-			        <= (command.timestamp.tv_sec*1000000+command.timestamp.tv_usec)
-			        /*gotten_unlike->timestamp <= command.timestamp*/) {
+			if (compare_stamp(gotten_unlike->timestamp, command.timestamp) < 0) {
 				remove_from_list(line->unlikes, gotten_unlike, sizeof(like));
 				like* new_like = malloc(sizeof(like));
 				memcpy(new_like->username, data.username, MAX_USERNAME_LEN);
@@ -77,9 +75,7 @@ void unlike_message(message* line, packet command) { //TODO: Add code to conside
 			return;
 			}
 		} else {
-			if ((gotten_unlike->timestamp.tv_sec*1000000+gotten_unlike->timestamp.tv_usec)
-			        < (command.timestamp.tv_sec*1000000+command.timestamp.tv_usec)
-			        /*gotten_like->timestamp < command.timestamp*/) {
+			if (compare_stamp(gotten_unlike->timestamp, command.timestamp) < 0) {
 			printf("here");
 				remove_from_list(line->likes, gotten_like, sizeof(like));
 				like* new_unlike = malloc(sizeof(like));
