@@ -38,6 +38,8 @@
 #include "packet.h"
 #include "net_include.h"
 #include "lamp_stamp.h"
+#include "linked_list.h"
+#include "chatroom.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -202,8 +204,8 @@ static	char		 mess[MAX_MESSLEN];
                 char payload[PAYLOAD];
             } packet;*/
             
-            packet new_pack;
-            new_pack.machine_num = machine_num;
+           // packet new_pack;
+            //new_pack.machine_num = machine_num;
             lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
             new_pack.timestamp = ls;
             //new_pack.timestamp = time(NULL);
@@ -216,6 +218,7 @@ static	char		 mess[MAX_MESSLEN];
 			int temp_int;
 			message temp_message;
 			like_payload temp_like_payload;
+			lamp_stamp ls;
 			
 	        switch( pack->type )
 	        {
@@ -256,7 +259,7 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	            case 'a'://append a message
 					send_packet.machine_num = machine_num;
-                    lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+                    ls.machine_num = machine_num; ls.counter = ++lamp_counter;
                     send_packet.timestamp = ls;
 					//send_packet.timestamp = time(NULL);
 					send_packet.update_num = 10*(update_num++) + machine_num;//guaranteed to be unique
@@ -276,7 +279,7 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	            case 'l'://like a message
 					send_packet.machine_num = machine_num;
-					lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+					ls.machine_num = machine_num; ls.counter = ++lamp_counter;
 					send_packet.timestamp = ls;
 					send_packet.update_num = 10*(update_num++) + machine_num;
 					send_packet.packet_type = LIKE_COMMAND;
@@ -294,7 +297,7 @@ static	char		 mess[MAX_MESSLEN];
 					memcpy(temp_like_payload.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
 					memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
 					if (room != NULL) {
-						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), &send_packet );
+						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), (char*)&send_packet );
 						if( ret < 0 ) 
 						{
 							SP_error( ret );
@@ -304,7 +307,7 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	            case 'r'://unlike a message
 					send_packet.machine_num = machine_num;
-					lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+					ls.machine_num = machine_num; ls.counter = ++lamp_counter;
 					send_packet.timestamp = ls;
 					send_packet.update_num = 10*(update_num++) + machine_num;
 					send_packet.packet_type = UNLIKE_COMMAND;
@@ -315,14 +318,14 @@ static	char		 mess[MAX_MESSLEN];
 					} else {
 						temp_int--;
 					}
-					memcpy(&temp_message, get_element_at(room->messages, temp_int)); //get the message to like 
+					memcpy(&temp_message, get_element_at(room->messages, temp_int), sizeof(message)); //get the message to like 
 					temp_like_payload.line_number = temp_message.update_num; //its update num is the one we send
 					
 					memcpy(temp_like_payload.username, pack->username, MAX_USERNAME_LEN);
-					memcpy(temp_like_payload.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
+					memcpy(temp_like_payload.room_name, pack->room_name, MAX_ROOM_NAME_LEN);
 					memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
 					if (room != NULL) {
-						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), &send_packet );
+						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), (char*)&send_packet );
 						if( ret < 0 ) 
 						{
 							SP_error( ret );
