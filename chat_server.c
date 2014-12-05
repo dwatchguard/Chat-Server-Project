@@ -272,6 +272,31 @@ static	char		 mess[MAX_MESSLEN];
 					}
 	                break;
 	            case 'l'://like a message
+					send_packet.machine_num = machine_num;
+					gettimeofday(&send_pack.timestamp, NULL);
+					send_packet.update_num = update_num++;
+					send_packet.packet_type = LIKE_COMMAND;
+					
+					temp_int = (int)*pack->data;
+					if (room->messages->size > 25) {//find the index of the message to like
+						temp_int = temp_int -26+ room->messages->size;
+					} else {
+						temp_int--;
+					}
+					memcpy(&temp_message, get_element_at(room->messages, temp_int)); //get the message to like 
+					temp_like_payload.line_number = temp_message.update_num; //its update num is the one we send
+					
+					memcpy(temp_like_payload.username, pack->username, MAX_USERNAME_LEN);
+					memcpy(temp_like_payload.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
+					memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
+					if (room != NULL) {
+						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), &send_packet );
+						if( ret < 0 ) 
+						{
+							SP_error( ret );
+							Bye();
+						}
+					}
 	                break;
 	            case 'r'://unlike a message
 	                break;

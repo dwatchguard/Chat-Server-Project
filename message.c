@@ -1,5 +1,6 @@
 #include "linked_list.h"
 #include "message.h"
+#include "lamp_stamp.h"
 #include <stdio.h>
 #include <string.h>
 
