@@ -71,7 +71,7 @@ static  int     update_num = 0;
 static  int     lamp_counter = 0;
 static llist	*chatrooms;
 static llist	*users;	
-static llist	*updates[MAX_MEMBERS];
+static llist	*updates[NUM_MACHINES];
 
 
 static  char    connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
@@ -114,7 +114,7 @@ int main( int argc, char *argv[] )
         ret = SP_join( Mbox, servers_group );
         if( ret < 0 ) SP_error( ret );
 		
-		for (int i = 0; i < MAX_MEMBERS; i++) {
+		for (int i = 0; i < NUM_MACHINES; i++) {
 			updates[i] = initlist();
 		}
 		chatrooms = initlist();//allocate our chat rooms
@@ -231,12 +231,26 @@ static	char		 mess[MAX_MESSLEN];
 					memcpy(new_user->name, pack->new_name, MAX_USERNAME_LEN);
 					memcpy(new_user->Private_group, sender, MAX_GROUP_NAME);
 					add_to_end(users, &new_user, sizeof(user));
-				} else {
+				} else { // It is in a chat, need to send a leave update
 					remove_local_user(room, &temp_user);
 					user * new_user = malloc(sizeof(user));
 					memcpy(new_user->name, pack->new_name, MAX_USERNAME_LEN);
 					memcpy(new_user->Private_group, sender, MAX_GROUP_NAME);
 					add_local_user(room, new_user);
+					
+					send_packet.machine_num = machine_num;
+                    ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+                    send_packet.timestamp = ls;
+					send_packet.packet_type = LEAVE_COMMAND;
+					memcpy(send_packet.username, pack->username, MAX_USERNAME_LEN);
+					memcpy(send_packet.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
+					ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_mess), send_mess );
+						if( ret < 0 ) 
+						{
+							SP_error( ret );
+							Bye();
+						}
+					
 				}
 	                break;
 	            case 'c':
@@ -349,19 +363,18 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	        }
 	    } else if (*packet_type == APPEND_COMMAND){ //Then we received a message from a server
-			packet * new_command  = (packet*) mess;
+			//packet * new_command  = (packet*) mess;
 			
-			create_room(pack->new_room);
-			add_to_end(new_room);
+			chatroom* new_room = create_room(packet->new_room);
+			add_to_end(new_room, sizeof(chatroom));
 			
 		} else if (*packet_type == LIKE_COMMAND){ //Then we received a message from a 
-			packet * new_command  = (packet*) mess;
+			//packet * new_command  = (packet*) mess;
 		} else if (*packet_type == UNLIKE_COMMAND){ //Then we received a message from a server
-			packet * new_command  = (packet*) mess;
+			//packet * new_command  = (packet*) mess;
 		} else if (*packet_type == JOIN_COMMAND){ //Then we received a message from a server
 			packet * new_command  = (packet*) mess;
-			join_payload * payload = (join_payload*)mess->payload;
-			chatroom *room = get_chatroom(payload->room_name);
+			chatroom *room = get_chatroom(new_command->room_name);
 			if (room == NULL) {
 				room = create_room(pack->new_room);
 				add_to_end(chatrooms, room, sizeof(chatroom));

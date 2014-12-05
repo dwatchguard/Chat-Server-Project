@@ -12,7 +12,7 @@
 typedef struct chatroom
 {
     char name[MAX_ROOM_NAME_LEN];
-	llist *users;
+	llist *users[NUM_MACHINES];
 	llist *local_users;
 	llist *messages;
 	llist *pending_likes;
@@ -20,9 +20,9 @@ typedef struct chatroom
 } chatroom;
  
 chatroom* create_room(char* room_name);
-void add_user(chatroom *chat,char* username);
+void add_user(chatroom *chat,char* username, int machine_num);
 void add_local_user(chatroom *chat,user *new_user);
-void remove_user(chatroom *chat,char* username);
+void remove_user(chatroom *chat,char* username, int machine_num);
 void remove_local_user(chatroom *chat,user *leaver);
  
 llist* get_all_usernames(chatroom *chat);

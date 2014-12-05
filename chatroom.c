@@ -5,8 +5,10 @@
 */
 chatroom* create_room(char room_name[]) {
 	chatroom* temp_room = malloc(sizeof(chatroom));
-	command(temp_room->name,room_name, MAX_ROOM_NAME_LEN);
-	temp_room->users 		= initlist();
+	memcpy(temp_room->name,room_name, MAX_ROOM_NAME_LEN);
+	for (int i = 0; i < NUM_MACHINES; i++) {
+		temp_room->users[i]		= initlist();
+	}
 	temp_room->local_users 	= initlist();
 	temp_room->messages 	= initlist();
 	temp_room->pending_likes = initlist();
@@ -16,36 +18,38 @@ chatroom* create_room(char room_name[]) {
 /**
 *	Adds a user to the given chatroom
 */
-void add_user(chatroom *chat,char* username) {
-	add_to_end(chat->users, username, sizeof(MAX_USERNAME_LEN));
+void add_user(chatroom *chat,char* username, int machine_num) {
+	add_to_end(chat->users[machine_num], username, sizeof(MAX_USERNAME_LEN));
 }
 /**
 *	Adds a new local user to the chatroom
 */
 void add_local_user(chatroom *chat, user *new_user) {
-	add_to_end(chat->users, new_user->name, sizeof(MAX_USERNAME_LEN));
+	//add_to_end(chat->users, new_user->name, sizeof(MAX_USERNAME_LEN));
 	add_to_end(chat->local_users, new_user, sizeof(user));
 }
-void remove_user(chatroom *chat,char *username) {
-	list_remove(chat->users, username, sizeof(MAX_USERNAME_LEN));
+void remove_user(chatroom *chat,char *username, int machine_num) {
+	list_remove(chat->users[machine_num], username, sizeof(MAX_USERNAME_LEN));
 }
 void remove_local_user(chatroom *chat,user *leaver) {
-	list_remove(chat->users, leaver->name, sizeof(MAX_USERNAME_LEN));
+	//list_remove(chat->users[ma], leaver->name, sizeof(MAX_USERNAME_LEN));
 	list_remove(chat->local_users, leaver, sizeof(user));
 }
  
 llist* get_all_usernames(chatroom *chat) {
-	llist * usernames = malloc(sizeof(llist));
-	node *temp = chat->users->head;
-    while (temp != NULL)
-    {
-	
-        if (!list_has(usernames, temp->ptr, MAX_USERNAME_LEN)) //todo make sure this works
-        {
-            add_to_end(usernames, temp->ptr, MAX_USERNAME_LEN);
-        }
-        temp = temp->next;
-    }
+	llist * usernames = initlist();
+	node *temp;
+	for (int i = 0; i < NUM_MACHINES; i++) {
+	temp = chat->users[i]->head;
+		while (temp != NULL)
+		{
+			if (!list_has(usernames, temp->ptr, MAX_USERNAME_LEN)) //todo make sure this works
+			{
+				add_to_end(usernames, temp->ptr, MAX_USERNAME_LEN);
+			}
+			temp = temp->next;
+		}
+	}
     return usernames;
 }
 void add_message(chatroom * chat, packet command) {
@@ -54,7 +58,7 @@ void add_message(chatroom * chat, packet command) {
 	}
 	//message_payload data;
 	//command(&data, command.payload, sizeof(data));
-	message *new_message = init_message(data.username, data.message, command.update_num, command.timestamp);
+	message *new_message = init_message(command.username, command.message, command.update_num, command.timestamp);
 	add_to_end(chat->messages, new_message, MAX_MESS_LEN);	
 	add_pending_likes(chat);
 	sort_messages(chat);
@@ -63,7 +67,7 @@ int like_message_at(chatroom *chat, packet command) {
 
 	//like_payload data;
 	//command(&data, command.payload, sizeof(data));
-	message *mess = get_message(chat, data.line_number);
+	message *mess = get_message(chat, command.line_number);
     if (mess == NULL) {
         add_to_end(chat->pending_likes, &command, sizeof(command));
         return 0;
@@ -77,7 +81,7 @@ int like_message_at(chatroom *chat, packet command) {
 int unlike_message_at(chatroom *chat, packet command) {
 	//like_payload data;
 	//command(&data, command.payload, sizeof(data));
-    message *mess = get_message(chat, data.line_number);
+    message *mess = get_message(chat, command.line_number);
     if (mess == NULL) {
         add_to_end(chat->pending_unlikes, &command, sizeof(command));
         return 0;
