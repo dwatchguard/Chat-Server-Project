@@ -222,7 +222,7 @@ static	char		 mess[MAX_MESSLEN];
 	        {
 	            case 'u': //TODO: send to the other servers
 				if (room == NULL) {
-					remove_from_list(users, &temp_user, sizeof(user));
+					list_remove(users, &temp_user, sizeof(user));
 					user * new_user = malloc(sizeof(user));
 					memcpy(new_user->name, pack->new_name, MAX_USERNAME_LEN);
 					memcpy(new_user->Private_group, sender, MAX_GROUP_NAME);
@@ -242,7 +242,7 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	            case 'j'://join a chatroom
 					if (room == NULL) {
-						remove_from_list(users, &temp_user, sizeof(user));					
+						list_remove(users, &temp_user, sizeof(user));					
 					} else {
 						remove_local_user(room, &temp_user);
 					}
