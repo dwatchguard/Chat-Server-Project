@@ -29,4 +29,5 @@ bool list_has(llist *list, void *data, int data_size);
 void list_remove(llist *list, void *data, int data_size);
 void* index_at(llist *list, int index);
 int max(int a, int b);
+void* get_element_at(llist * list, int element_num);
 #endif  /* LINKED_LIST_H */
