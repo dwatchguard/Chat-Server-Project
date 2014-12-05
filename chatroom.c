@@ -9,6 +9,7 @@ chatroom* create_room(char room_name[]) {
 	for (int i = 0; i < NUM_MACHINES; i++) {
 		temp_room->users[i]		= initlist();
 	}
+
 	temp_room->local_users 	= initlist();
 	temp_room->messages 	= initlist();
 	temp_room->pending_likes = initlist();
