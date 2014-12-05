@@ -40,6 +40,7 @@
 #include "lamp_stamp.h"
 #include "linked_list.h"
 #include "chatroom.h"
+#include "message.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -49,7 +50,7 @@
 
 #define int32u unsigned int
 
-#include "test.c"//This is temporary, but this will include all of our data structure functionality
+//#include "test.c"//This is temporary, but this will include all of our data structure functionality
 
 static	char	User[80];
 static  char    Spread_name[80];
@@ -206,9 +207,7 @@ static	char		 mess[MAX_MESSLEN];
             
            // packet new_pack;
             //new_pack.machine_num = machine_num;
-            lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
-            new_pack.timestamp = ls;
-            //new_pack.timestamp = time(NULL);
+            lamp_stamp ls; 
 			chatroom *room = get_chatroom(pack->room_name);
 			user temp_user;
 			memcpy(temp_user.name, pack->username, MAX_USERNAME_LEN);
@@ -218,7 +217,6 @@ static	char		 mess[MAX_MESSLEN];
 			int temp_int;
 			message temp_message;
 			like_payload temp_like_payload;
-			lamp_stamp ls;
 			
 	        switch( pack->type )
 	        {
