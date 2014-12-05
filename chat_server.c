@@ -37,10 +37,10 @@
 #include "include/sp.h"
 #include "packet.h"
 #include "net_include.h"
-#include "lamp_stamp.h"
-#include "linked_list.h"
-#include "chatroom.h"
-#include "message.h"
+#include "lamp_stamp.c"
+#include "linked_list.c"
+#include "chatroom.c"
+#include "message.c"
 
 #include <sys/types.h>
 #include <stdio.h>
