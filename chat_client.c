@@ -40,6 +40,7 @@
 #include "chatroom.c"
 #include "linked_list.c"
 #include "lamp_stamp.c"
+#include "message.c"
 
 #include <sys/types.h>
 #include <stdio.h>
