@@ -37,6 +37,9 @@
 #include "sp.h"
 #include "net_include.h"
 #include "packet.h"
+#include "chatroom.h"
+#include "linked_list.h"
+#include "lamp_stamp.c"
 
 #include <sys/types.h>
 #include <stdio.h>

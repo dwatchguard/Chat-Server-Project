@@ -139,12 +139,6 @@ void* index_at(llist *list, int index) {
 	return temp;
 }
 
-int timeval_max(struct timeval_a, struct timeval_b) {
-    int a = timeval_a.tv_sec*1000 + timeval_a.tv_usec;
-    int b = timeval_b.tv_sec*1000 + timeval_b.tv_usec;
-    return max(a,b);
-}
-
 int max(int a, int b) {
 	if (a > b)
 		return a;

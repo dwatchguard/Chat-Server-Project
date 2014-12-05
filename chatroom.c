@@ -54,7 +54,7 @@ void add_message(chatroom * chat, packet command) {
 	}
 	message_payload data;
 	memcpy(&data, command.payload, sizeof(data));
-	message *new_message = init_message(data.username, data.message, command.update_num);
+	message *new_message = init_message(data.username, data.message, command.update_num, command.timestamp);
 	add_to_end(chat->messages, new_message, MAX_MESS_LEN);	
 	add_pending_likes(chat);
 	sort_messages(chat);
@@ -65,7 +65,7 @@ int like_message_at(chatroom *chat, packet command) {
 	memcpy(&data, command.payload, sizeof(data));
 	message *mess = get_message(chat, data.line_number);
     if (mess == NULL) {
-        add_to_end(chat->pending_likes, &command);
+        add_to_end(chat->pending_likes, &command, sizeof(command));
         return 0;
     }
     else {
@@ -79,7 +79,7 @@ int unlike_message_at(chatroom *chat, packet command) {
 	memcpy(&data, command.payload, sizeof(data));
     message *mess = get_message(chat, data.line_number);
     if (mess == NULL) {
-        add_to_end(chat->pending_unslikes, &command);
+        add_to_end(chat->pending_unlikes, &command, sizeof(command));
         return 0;
     }
     else {
@@ -109,16 +109,16 @@ void add_pending_likes(chatroom *chat) {
     node *temp = chat->pending_likes->head;
     for (int i = 0; i < chat->pending_likes->size; i++) {
         packet *temp_pack = (packet *) temp->ptr;
-        if (like_message_at(chat, temp_pack) == 1) {
-            remove_from_list(chat->pending_likes, temp_pack);
+        if (like_message_at(chat, *temp_pack) == 1) {
+            remove_from_list(chat->pending_likes, temp_pack, sizeof(packet));
         }
         temp = temp->next;
     }
-    temp = chat->pending_unslikes->head;
+    temp = chat->pending_unlikes->head;
     for (int i = 0; i < chat->pending_unlikes->size; i++) {
         packet *temp_pack = (packet *) temp->ptr;
-        if (unlike_message_at(chat, temp_pack) == 1) {
-            remove_from_list(chat->pending_unlikes, temp_pack);
+        if (unlike_message_at(chat, *temp_pack) == 1) {
+            remove_from_list(chat->pending_unlikes, temp_pack, sizeof(packet));
         }
         temp = temp->next;
     }
@@ -132,13 +132,13 @@ void sort_messages(chatroom *chat) {
     while (swapped == 0) {
         for (int i = 0; i < size - 1; i++) {
             prev = temp->prev;
-            message *temp_mess = (mess *) temp->ptr;
-            message *temp_prev = (mess *) prev->ptr;
-            if (compare_stamp(temp_mess->lamp_stamp, temp_prev->lamp_stamp) < 0) {
+            message *temp_mess = (message *) temp->ptr;
+            message *temp_prev = (message *) prev->ptr;
+            if (compare_stamp(&temp_mess->timestamp, &temp_prev->timestamp) < 0) {
                 node *temptemp = temp;
                 temp = prev;
                 prev = temptemp;
-                swapped = 1
+                swapped = 1;
             }
             temp = prev;
         }
