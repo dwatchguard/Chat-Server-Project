@@ -10,12 +10,12 @@ int compare_stamp(lamp_stamp *ls1, lamp_stamp *ls2) {
     else if (ls1->machine_num > ls2->machine_num) {
         return 1;
     }
-    else if (ls2->machine_num > ls1->machine_num) {
+    else {
         return -1;
     }
 }
 
-lamp_stamp *max_stamp(lamp_stamp ls1, lamp_stamp ls2) {
+lamp_stamp max_stamp(lamp_stamp ls1, lamp_stamp ls2) {
     if (compare_stamp(&ls1, &ls2) < 0) {
         return ls2;
     }

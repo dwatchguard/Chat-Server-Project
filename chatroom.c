@@ -1,5 +1,4 @@
 #include "chatroom.h"
-#include "lamp_stamp.h"
 
 /**
 *	Creates a chat room with the given name. handles memory allocation.
