@@ -146,8 +146,8 @@ int max(int a, int b) {
 }
 
 void* get_element_at(llist * list, int element_num) {
-	if ( element_num < 0 || element_num > = list->size) {
-		return null;
+	if ( element_num < 0 || element_num >= list->size) {
+		return NULL;
 	}
 	node * temp = list->head;
 	for (int i = 0; i < element_num; i++){
