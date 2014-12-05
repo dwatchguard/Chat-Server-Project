@@ -71,6 +71,7 @@ static  int     update_num = 0;
 static  int     lamp_counter = 0;
 static llist	*chatrooms;
 static llist	*users;	
+static llist	*updates[MAX_MEMBERS];
 
 
 static  char    connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
@@ -113,6 +114,9 @@ int main( int argc, char *argv[] )
         ret = SP_join( Mbox, servers_group );
         if( ret < 0 ) SP_error( ret );
 		
+		for (int i = 0; i < MAX_MEMBERS; i++) {
+			updates[i] = initlist();
+		}
 		chatrooms = initlist();//allocate our chat rooms
 		users = initlist();
 		
@@ -216,7 +220,7 @@ static	char		 mess[MAX_MESSLEN];
 			packet send_packet;
 			int temp_int;
 			message temp_message;
-			like_payload temp_like_payload;
+			//like_payload temp_like_payload;
 			
 	        switch( pack->type )
 	        {
@@ -241,19 +245,14 @@ static	char		 mess[MAX_MESSLEN];
 					add_to_end(users, &new_user, sizeof(user));
 	                break;
 	            case 'j'://join a chatroom
-					if (room == NULL) {
-						list_remove(users, &temp_user, sizeof(user));					
-					} else {
-						remove_local_user(room, &temp_user);
-					}
-					chatroom * new_room = get_chatroom(pack->new_room);
-					if (room == NULL) {
-						new_room = create_room(pack->new_room);
-						add_to_end(chatrooms, new_room, sizeof(chatroom));
-					}
-					new_user = malloc(sizeof(user));
-					memcpy(new_user, &temp_user, sizeof(user));
-					add_local_user(new_room, new_user);					
+					send_packet.machine_num = machine_num;
+                    ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+                    send_packet.timestamp = ls;
+					//send_packet.timestamp = time(NULL);
+					send_packet.update_num = 10*(update_num++) + machine_num;//guaranteed to be unique
+					send_packet.packet_type = JOIN_COMMAND;
+					
+
 	                break;
 	            case 'a'://append a message
 					send_packet.machine_num = machine_num;
@@ -262,10 +261,10 @@ static	char		 mess[MAX_MESSLEN];
 					//send_packet.timestamp = time(NULL);
 					send_packet.update_num = 10*(update_num++) + machine_num;//guaranteed to be unique
 					send_packet.packet_type = APPEND_COMMAND;
-					message_payload temp_payload;
-					memcpy(temp_payload.username, pack->username, MAX_USERNAME_LEN);
-					memcpy(temp_payload.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
-					memcpy(temp_payload.message, pack->data,MAX_MESS_LEN);
+					//message_payload temp_payload;
+					memcpy(send_packet.username, pack->username, MAX_USERNAME_LEN);
+					memcpy(send_packet.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
+					memcpy(send_packet.message, pack->data,MAX_MESS_LEN);
 					if (room != NULL) {
 						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_mess), send_mess );
 						if( ret < 0 ) 
@@ -289,11 +288,11 @@ static	char		 mess[MAX_MESSLEN];
 						temp_int--;
 					}
 					memcpy(&temp_message, get_element_at(room->messages, temp_int), sizeof(message)); //get the message to like 
-					temp_like_payload.line_number = temp_message.update_num; //its update num is the one we send
+					send_packet.line_number = temp_message.update_num; //its update num is the one we send
 					
-					memcpy(temp_like_payload.username, pack->username, MAX_USERNAME_LEN);
-					memcpy(temp_like_payload.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
-					memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
+					memcpy(send_packet.username, pack->username, MAX_USERNAME_LEN);
+					memcpy(send_packet.room_name, pack->room_name,MAX_ROOM_NAME_LEN);
+					//memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
 					if (room != NULL) {
 						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), (char*)&send_packet );
 						if( ret < 0 ) 
@@ -317,11 +316,11 @@ static	char		 mess[MAX_MESSLEN];
 						temp_int--;
 					}
 					memcpy(&temp_message, get_element_at(room->messages, temp_int), sizeof(message)); //get the message to like 
-					temp_like_payload.line_number = temp_message.update_num; //its update num is the one we send
+					send_packet.line_number = temp_message.update_num; //its update num is the one we send
 					
-					memcpy(temp_like_payload.username, pack->username, MAX_USERNAME_LEN);
-					memcpy(temp_like_payload.room_name, pack->room_name, MAX_ROOM_NAME_LEN);
-					memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
+					memcpy(send_packet.username, pack->username, MAX_USERNAME_LEN);
+					memcpy(send_packet.room_name, pack->room_name, MAX_ROOM_NAME_LEN);
+					//memcpy(send_packet.payload, &temp_like_payload, sizeof(temp_like_payload));
 					if (room != NULL) {
 						ret= SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(send_packet), (char*)&send_packet );
 						if( ret < 0 ) 
@@ -331,9 +330,9 @@ static	char		 mess[MAX_MESSLEN];
 						}
 					}
 	                break;
-	            case 'h'://get the entire history
+	            case 'h'://get the entire history should be done by the client
 	                break;
-	            case 'v'://get the view
+	            case 'v'://get the view this should be done by the client
 	                strcat(send_mess, "\n");
                     for( i=0; i < num_connected_servers; i++ ) {
                         strcat(send_mess, "\t");
@@ -349,7 +348,30 @@ static	char		 mess[MAX_MESSLEN];
                         //printf("\t%s\n", &connected_servers[i][0] );
 	                break;
 	        }
-	    }
+	    } else if (*packet_type == APPEND_COMMAND){ //Then we received a message from a server
+			packet * new_command  = (packet*) mess;
+			
+			create_room(pack->new_room);
+			add_to_end(new_room);
+			
+		} else if (*packet_type == LIKE_COMMAND){ //Then we received a message from a 
+			packet * new_command  = (packet*) mess;
+		} else if (*packet_type == UNLIKE_COMMAND){ //Then we received a message from a server
+			packet * new_command  = (packet*) mess;
+		} else if (*packet_type == JOIN_COMMAND){ //Then we received a message from a server
+			packet * new_command  = (packet*) mess;
+			join_payload * payload = (join_payload*)mess->payload;
+			chatroom *room = get_chatroom(payload->room_name);
+			if (room == NULL) {
+				room = create_room(pack->new_room);
+				add_to_end(chatrooms, room, sizeof(chatroom));
+			}
+			new_user = malloc(sizeof(user));
+			memcpy(new_user, &temp_user, sizeof(user));
+			add_local_user(new_room, new_user);					
+		} else if (*packet_type == LEAVE_COMMAND){ //Then we received a message from a server
+			packet * new_command  = (packet*) mess;
+		}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )
         {

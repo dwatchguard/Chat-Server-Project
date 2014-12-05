@@ -5,7 +5,7 @@
 */
 chatroom* create_room(char room_name[]) {
 	chatroom* temp_room = malloc(sizeof(chatroom));
-	memcpy(temp_room->name,room_name, MAX_ROOM_NAME_LEN);
+	command(temp_room->name,room_name, MAX_ROOM_NAME_LEN);
 	temp_room->users 		= initlist();
 	temp_room->local_users 	= initlist();
 	temp_room->messages 	= initlist();
@@ -52,8 +52,8 @@ void add_message(chatroom * chat, packet command) {
 	if (command.packet_type != APPEND_COMMAND) {
 		return;
 	}
-	message_payload data;
-	memcpy(&data, command.payload, sizeof(data));
+	//message_payload data;
+	//command(&data, command.payload, sizeof(data));
 	message *new_message = init_message(data.username, data.message, command.update_num, command.timestamp);
 	add_to_end(chat->messages, new_message, MAX_MESS_LEN);	
 	add_pending_likes(chat);
@@ -61,8 +61,8 @@ void add_message(chatroom * chat, packet command) {
 }
 int like_message_at(chatroom *chat, packet command) {
 
-	like_payload data;
-	memcpy(&data, command.payload, sizeof(data));
+	//like_payload data;
+	//command(&data, command.payload, sizeof(data));
 	message *mess = get_message(chat, data.line_number);
     if (mess == NULL) {
         add_to_end(chat->pending_likes, &command, sizeof(command));
@@ -75,8 +75,8 @@ int like_message_at(chatroom *chat, packet command) {
 	
 }
 int unlike_message_at(chatroom *chat, packet command) {
-	like_payload data;
-	memcpy(&data, command.payload, sizeof(data));
+	//like_payload data;
+	//command(&data, command.payload, sizeof(data));
     message *mess = get_message(chat, data.line_number);
     if (mess == NULL) {
         add_to_end(chat->pending_unlikes, &command, sizeof(command));

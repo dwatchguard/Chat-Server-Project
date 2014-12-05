@@ -18,17 +18,17 @@ message *init_message(char *poster, char *line, int number, lamp_stamp timestamp
 
 void like_message(message* line, packet command) { //TODO: Add code to consider unlike timestamps
 	if (command.packet_type == LIKE_COMMAND) {
-		like_payload data;
-		memcpy(&data, &command.payload, sizeof(data));
-		if (memcmp(data.username, line->poster_name, MAX_USERNAME_LEN) == 0) {
+		//like_payload command;
+		//memcpy(&command, &command.payload, sizeof(command));
+		if (memcmp(command.username, line->poster_name, MAX_USERNAME_LEN) == 0) {
 			return;
 		}
-		like* gotten_like = get_like(line, data.username);
-		like* gotten_unlike = get_unlike(line, data.username);
+		like* gotten_like = get_like(line, command.username);
+		like* gotten_unlike = get_unlike(line, command.username);
 		if(gotten_unlike == NULL) {
 			if (gotten_like == NULL) { //It has not been liked or unliked, so we like it
 				like* new_like = malloc(sizeof(like));
-				memcpy(new_like->username, data.username, MAX_USERNAME_LEN);
+				memcpy(new_like->username, command.username, MAX_USERNAME_LEN);
 				new_like->timestamp = command.timestamp;
 				add_to_end(line -> likes, new_like, sizeof(like));
 				line->num_likes++;
@@ -41,7 +41,7 @@ void like_message(message* line, packet command) { //TODO: Add code to consider 
 			if (compare_stamp(&gotten_unlike->timestamp, &command.timestamp) < 0) {
 				list_remove(line->unlikes, gotten_unlike, sizeof(like));
 				like* new_like = malloc(sizeof(like));
-				memcpy(new_like->username, data.username, MAX_USERNAME_LEN);
+				memcpy(new_like->username, command.username, MAX_USERNAME_LEN);
 				new_like->timestamp = command.timestamp;
 				add_to_end(line -> likes, new_like, sizeof(like));
 				line->num_likes++;
@@ -50,24 +50,24 @@ void like_message(message* line, packet command) { //TODO: Add code to consider 
 	}
 }
 /*
-	int diff = difftime(command.timestamp, get_like(line, data.user_name).timestamp);
+	int diff = difftime(command.timestamp, get_like(line, command.user_name).timestamp);
 			if (diff >= 0) {
 */
 
 void unlike_message(message* line, packet command) { //TODO: Add code to consider like timestamps
 	if (command.packet_type == UNLIKE_COMMAND) {
-		like_payload data;
-		memcpy(&data, &command.payload, sizeof(data));
-		if (memcmp(data.username, line->poster_name, MAX_USERNAME_LEN) == 0) {
+		//like_payload command;
+		//memcpy(&command, &command.payload, sizeof(command));
+		if (memcmp(command.username, line->poster_name, MAX_USERNAME_LEN) == 0) {
 			return;
 		}
-		like* gotten_like = get_like(line, data.username);
-		like* gotten_unlike = get_unlike(line, data.username);
+		like* gotten_like = get_like(line, command.username);
+		like* gotten_unlike = get_unlike(line, command.username);
 		printf("%p\n",gotten_like);
 		if(gotten_like == NULL) {
 			if (gotten_unlike == NULL) { //It has not been liked or unliked, so we unlike it
 				like* new_unlike = malloc(sizeof(like));
-				memcpy(new_unlike->username, data.username, MAX_USERNAME_LEN);
+				memcpy(new_unlike->username, command.username, MAX_USERNAME_LEN);
 				new_unlike->timestamp = command.timestamp;
 				add_to_end(line -> unlikes, new_unlike, sizeof(like));
 				return;
@@ -80,7 +80,7 @@ void unlike_message(message* line, packet command) { //TODO: Add code to conside
 			printf("here");
 				list_remove(line->likes, gotten_like, sizeof(like));
 				like* new_unlike = malloc(sizeof(like));
-				memcpy(new_unlike->username, data.username, MAX_USERNAME_LEN);
+				memcpy(new_unlike->username, command.username, MAX_USERNAME_LEN);
 				new_unlike->timestamp = command.timestamp;
 				add_to_end(line -> unlikes, new_unlike, sizeof(like));
 				line->num_likes--;
