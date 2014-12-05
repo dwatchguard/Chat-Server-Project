@@ -39,7 +39,7 @@ void like_message(message* line, packet command) { //TODO: Add code to consider 
 			}
 		} else {
 			if (compare_stamp(&gotten_unlike->timestamp, &command.timestamp) < 0) {
-				remove_from_list(line->unlikes, gotten_unlike, sizeof(like));
+				list_remove(line->unlikes, gotten_unlike, sizeof(like));
 				like* new_like = malloc(sizeof(like));
 				memcpy(new_like->username, data.username, MAX_USERNAME_LEN);
 				new_like->timestamp = command.timestamp;
@@ -78,7 +78,7 @@ void unlike_message(message* line, packet command) { //TODO: Add code to conside
 		} else {
 			if (compare_stamp(&gotten_unlike->timestamp, &command.timestamp) < 0) {
 			printf("here");
-				remove_from_list(line->likes, gotten_like, sizeof(like));
+				list_remove(line->likes, gotten_like, sizeof(like));
 				like* new_unlike = malloc(sizeof(like));
 				memcpy(new_unlike->username, data.username, MAX_USERNAME_LEN);
 				new_unlike->timestamp = command.timestamp;
