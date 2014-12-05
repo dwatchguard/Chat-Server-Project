@@ -37,6 +37,7 @@
 #include "include/sp.h"
 #include "packet.h"
 #include "net_include.h"
+#include "lamp_stamp.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -203,7 +204,7 @@ static	char		 mess[MAX_MESSLEN];
             
             packet new_pack;
             new_pack.machine_num = machine_num;
-            lamp_stamp ls; ls.machine_num = machine_num; ls.timestamp = ++lamp_counter;
+            lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
             new_pack.timestamp = ls;
             //new_pack.timestamp = time(NULL);
 			chatroom *room = get_chatroom(pack->room_name);
@@ -252,7 +253,8 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	            case 'a'://append a message
 					send_packet.machine_num = machine_num;
-					gettimeofday(&send_pack.timestamp, NULL)
+                    lamp_stamp ls; ls.machine_num = machine_num; ls.counter = ++lamp_counter;
+                    send_packet.timestamp = ls;
 					//send_packet.timestamp = time(NULL);
 					send_packet.update_num = update_num++;
 					send_packet.packet_type = APPEND_COMMAND;

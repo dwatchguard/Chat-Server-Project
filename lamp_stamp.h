@@ -8,5 +8,6 @@ typedef struct lamp_stamp
 } lamp_stamp;
 
 int compare_stamp(lamp_stamp *ls1, lamp_stamp *ls2);
+lamp_stamp max_stamp(lamp_stamp ls1, lamp_stamp ls2);
 
 #endif

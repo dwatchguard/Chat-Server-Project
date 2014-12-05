@@ -1,5 +1,6 @@
 #include "linked_list.h"
 #include "message.h"
+#include "lamp_stamp.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -33,11 +34,11 @@ void like_message(message* line, packet command) { //TODO: Add code to consider 
 				line->num_likes++;
 				return;
 			} else {//Set the timestamp to be the correct one.
-			gotten_like->timestamp = max(gotten_like->timestamp, command.timestamp);
+			gotten_like->timestamp = max_stamp(gotten_like->timestamp, command.timestamp);
 			return;
 			}
 		} else {
-			if (compare_stamp(gotten_unlike->timestamp, command.timestamp) < 0) {
+			if (compare_stamp(&gotten_unlike->timestamp, &command.timestamp) < 0) {
 				remove_from_list(line->unlikes, gotten_unlike, sizeof(like));
 				like* new_like = malloc(sizeof(like));
 				memcpy(new_like->username, data.username, MAX_USERNAME_LEN);
@@ -71,11 +72,11 @@ void unlike_message(message* line, packet command) { //TODO: Add code to conside
 				add_to_end(line -> unlikes, new_unlike, sizeof(like));
 				return;
 			} else {//Set the timestamp to be the correct one.
-			gotten_unlike->timestamp = max(gotten_unlike->timestamp, command.timestamp);
-			return;
+			    gotten_unlike->timestamp = max_stamp(gotten_unlike->timestamp, command.timestamp);
+			    return;
 			}
 		} else {
-			if (compare_stamp(gotten_unlike->timestamp, command.timestamp) < 0) {
+			if (compare_stamp(&gotten_unlike->timestamp, &command.timestamp) < 0) {
 			printf("here");
 				remove_from_list(line->likes, gotten_like, sizeof(like));
 				like* new_unlike = malloc(sizeof(like));

@@ -14,3 +14,12 @@ int compare_stamp(lamp_stamp *ls1, lamp_stamp *ls2) {
         return -1;
     }
 }
+
+lamp_stamp *max_stamp(lamp_stamp ls1, lamp_stamp ls2) {
+    if (compare_stamp(&ls1, &ls2) < 0) {
+        return ls2;
+    }
+    else {
+        return ls1;
+    }
+}
