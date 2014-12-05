@@ -35,4 +35,4 @@ char* get_entire_history(chatroom *chat);
 message* get_message(chatroom* chat, int message_number);
 void add_pending_likes(chatroom *chat);
 void sort_messages(chatroom *chat);
-#endif  
+#endif

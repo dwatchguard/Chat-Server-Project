@@ -66,6 +66,7 @@ static  int     To_exit = 0;
 static  char    username[MAX_USERNAME_LEN] = "";
 static  char    server[MAX_SERVER_NAME_LEN] = "";
 static  char    room_name[MAX_ROOM_NAME_LEN] = "";
+static  chatroom *room;
 
 static	void	Print_menu();
 static	void	User_command();
@@ -193,7 +194,7 @@ static	void	User_command()
 	            printf("Please enter a command with two arguments\n");
 	            break;
 	        }
-	        if (strcmp(room_name, "") == 0) {
+	        if (strcmp(room_name, "") != 0) {
                 client_packet pack2;
 	            pack2.packet_type = CLIENT_PACKET;
 	            strcpy(pack2.username, username);
@@ -208,13 +209,17 @@ static	void	User_command()
 	        }
 			pack.type = 'j';
 			sscanf( &command[2], "%s", pack.data );
-			ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
-			if( ret < 0 ) 
-			{
-				SP_error( ret );
-				Bye();
-			}
-			sscanf( &command[2], "%s", room_name);
+			if (strcmp(room_name, pack.data) != 0) {
+                ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
+                if( ret < 0 ) 
+                {
+                    SP_error( ret );
+                    Bye();
+                }
+                sscanf( &command[2], "%s", room_name);
+                room = create_room(room_name);
+                add_user(room, username);
+            }
 		    break;
 		case 'a':
 			printf("enter message: ");
@@ -263,13 +268,14 @@ static	void	User_command()
 			}
 		    break;
 		case 'h':
-			pack.type = 'h';
-			ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
-			if( ret < 0 ) 
-			{
-				SP_error( ret );
-				Bye();
-			}
+			//pack.type = 'h';
+			//ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
+			//if( ret < 0 ) 
+			//{
+			//	SP_error( ret );
+			//	Bye();
+			//}
+			get_entire_history(room);
 		    break;
 		case 'v':
 			pack.type = 'v';
@@ -365,6 +371,25 @@ static	char		 mess[MAX_MESSLEN];
 		else if( Is_safe_mess(       service_type ) ) printf("received SAFE ");
 		printf("message from %s, of type %d, (endian %d) to %d groups \n(%d bytes): %s\n",
 			sender, mess_type, endian_mismatch, num_groups, ret, mess );
+//==================================================================================================	
+	    int *packet_type = (int *) mess;
+	    packet *command = (packet *) mess;
+	    if (*packet_type == APPEND_COMMAND) {
+	        add_message(room, *command);
+	    }
+	    else if (*packet_type == LIKE_COMMAND) {
+	        like_message_at(room, *command);
+	    }
+	    else if (*packet_type == UNLIKE_COMMAND) {
+	        unlike_message_at(room, *command);
+	    }
+	    else if (*packet_type == JOIN_COMMAND) {
+	        add_user(room, command->username);
+	    }
+	    else if (*packet_type == LEAVE_COMMAND) {
+	        remove_user(room, command->username);
+	    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )
         {
                 ret = SP_get_memb_info( mess, service_type, &memb_info );
