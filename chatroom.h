@@ -6,6 +6,7 @@
 #include "linked_list.h"
 #include "net_include.h"
 #include "lamp_stamp.h"
+#include "message.h"
  
  //struct representing a chatroom
 typedef struct chatroom
