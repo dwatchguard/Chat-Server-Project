@@ -28,11 +28,11 @@ void add_local_user(chatroom *chat, user *new_user) {
 	add_to_end(chat->local_users, new_user, sizeof(user));
 }
 void remove_user(chatroom *chat,char *username) {
-	remove_from_list(chat->users, username, sizeof(MAX_USERNAME_LEN));
+	list_remove(chat->users, username, sizeof(MAX_USERNAME_LEN));
 }
 void remove_local_user(chatroom *chat,user *leaver) {
-	remove_from_list(chat->users, leaver->name, sizeof(MAX_USERNAME_LEN));
-	remove_from_list(chat->local_users, leaver, sizeof(user));
+	list_remove(chat->users, leaver->name, sizeof(MAX_USERNAME_LEN));
+	list_remove(chat->local_users, leaver, sizeof(user));
 }
  
 llist* get_all_usernames(chatroom *chat) {
