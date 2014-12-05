@@ -9,10 +9,10 @@ all:  chat_client chat_server
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
-chat_client:  $(SP_LIBRARY_DIR)/libspread-core.a chat_client.o
+chat_client:  chatroom.c linked_list.c lamp_stamp.c message.c $(SP_LIBRARY_DIR)/libspread-core.a chat_client.o
 	$(LD) -o $@ chat_client.o $(SP_LIBRARY_DIR)/libspread-core.a -ldl -lm -lrt -lnsl $(SP_LIBRARY_DIR)/libspread-util.a
 
-chat_server: $(SP_LIBRARY_DIR)/libspread-core.a chat_server.o
+chat_server: chatroom.c linked_list.c lamp_stamp.c message.c $(SP_LIBRARY_DIR)/libspread-core.a chat_server.o
 	$(LD) -o $@ chat_server.o $(SP_LIBRARY_DIR)/libspread-core.a -ldl -lm -lrt -lnsl $(SP_LIBRARY_DIR)/libspread-util.a
 
 clean:
