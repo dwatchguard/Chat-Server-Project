@@ -111,7 +111,7 @@ void add_pending_likes(chatroom *chat) {
     for (int i = 0; i < chat->pending_likes->size; i++) {
         packet *temp_pack = (packet *) temp->ptr;
         if (like_message_at(chat, *temp_pack) == 1) {
-            remove_from_list(chat->pending_likes, temp_pack, sizeof(packet));
+            list_remove(chat->pending_likes, temp_pack, sizeof(packet));
         }
         temp = temp->next;
     }
@@ -119,7 +119,7 @@ void add_pending_likes(chatroom *chat) {
     for (int i = 0; i < chat->pending_unlikes->size; i++) {
         packet *temp_pack = (packet *) temp->ptr;
         if (unlike_message_at(chat, *temp_pack) == 1) {
-            remove_from_list(chat->pending_unlikes, temp_pack, sizeof(packet));
+            list_remove(chat->pending_unlikes, temp_pack, sizeof(packet));
         }
         temp = temp->next;
     }

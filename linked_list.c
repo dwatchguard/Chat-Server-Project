@@ -81,7 +81,7 @@ void* pop(llist *list)
 
 
 //Removes the given element from the list
-void remove_from_list(llist *list, void *element, int element_size) {
+void list_remove(llist *list, void *element, int element_size) {
     node *temp = list->head;
     while (temp != NULL)
     {
