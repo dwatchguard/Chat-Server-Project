@@ -70,17 +70,20 @@ static  int     lamp_counter = 0;
 static llist	*chatrooms;
 static llist	*users;	
 static llist	*updates[NUM_MACHINES];
+static  int     max_recvd[NUM_MACHINES];
 
 
 static  char    connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
 static  char    *servers_group = "servers";
 static  int     num_connected_servers;
+static  int     servers_connected[NUM_MACHINES];
 
 static	void	Read_message();
 static	void	Usage( int argc, char *argv[] );
 static  void	Bye();
 static  chatroom* get_chatroom(char chat_name[]);
 static void send_connected();
+void send_status_packets();
 
 int main( int argc, char *argv[] )
 {
@@ -363,16 +366,24 @@ static	char		 mess[MAX_MESSLEN];
 	        }
 	    } else if (*packet_type == APPEND_COMMAND){ //Then we received a message from a server
 			packet * new_command  = (packet*) mess;
+			add_to_end(updates[new_command->machine_num], new_command, sizeof(new_command));
+			max_recvd[new_command->machine_num] = new_command->update_num;
 			
 			chatroom* new_room = create_room(new_command->room_name);
 			add_to_end(chatrooms, new_room, sizeof(chatroom));
 			
 		} else if (*packet_type == LIKE_COMMAND){ //Then we received a message from a 
-			//packet * new_command  = (packet*) mess;
+			packet * new_command  = (packet*) mess;
+			add_to_end(updates[new_command->machine_num], new_command, sizeof(new_command));
+			max_recvd[new_command->machine_num] = new_command->update_num;
 		} else if (*packet_type == UNLIKE_COMMAND){ //Then we received a message from a server
-			//packet * new_command  = (packet*) mess;
+			packet * new_command  = (packet*) mess;
+			add_to_end(updates[new_command->machine_num], new_command, sizeof(new_command));
+			max_recvd[new_command->machine_num] = new_command->update_num;
 		} else if (*packet_type == JOIN_COMMAND){ //Then we received a message from a server
 			packet * new_command  = (packet*) mess;
+			add_to_end(updates[new_command->machine_num], new_command, sizeof(new_command));
+			max_recvd[new_command->machine_num] = new_command->update_num;
 			chatroom *room = get_chatroom(new_command->room_name);
 			if (room == NULL) {
 				room = create_room(new_command->room_name);
@@ -382,7 +393,28 @@ static	char		 mess[MAX_MESSLEN];
 			memcpy(new_user, new_command->username, MAX_USERNAME_LEN);
 			add_user(room, new_user, new_command->machine_num);					
 		} else if (*packet_type == LEAVE_COMMAND){ //Then we received a message from a server
-			//packet * new_command  = (packet*) mess;
+			packet * new_command  = (packet*) mess;
+			add_to_end(updates[new_command->machine_num], new_command, sizeof(new_command));
+			max_recvd[new_command->machine_num] = new_command->update_num;
+		}
+		else if (*packet_type == STATUS_PACKET) {
+		    status_packet *pack = (status_packet *) mess;
+		    if (pack->max_recvd[machine_num] < max_recvd[machine_num]) {
+		        int num_to_send = 0;
+		        node *update_node = updates[machine_num]->tail;
+		        packet *update = (packet *) update_node->ptr;
+		        while (update->update_num > pack->max_recvd[machine_num]) {
+		            update_node = update_node->prev;
+		            update = (packet *) update_node->ptr;
+		            num_to_send++;
+		        }
+		        update_node = update_node->next;
+		        for (int i = 0; i < num_to_send; i++) {
+		            update = (packet *) update_node->ptr;
+		            ret= SP_multicast( Mbox, SAFE_MESS, sender, 1, sizeof(update), (char *) update );
+		            update_node = update_node->next;
+		        } 
+		    }
 		}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )
@@ -398,7 +430,14 @@ static	char		 mess[MAX_MESSLEN];
                 memcpy(connected_servers, target_groups, sizeof(target_groups));
                 num_connected_servers = num_groups;
             }
+	        for (int i = 0; i < NUM_MACHINES; i++) {
+	            servers_connected[i] = 0;
+	        }
+	        for (int i = 0; i < num_connected_servers; i++) {
+	            servers_connected[connected_servers[i][1] - '0' - 1] = 1;
+	        }
 
+            send_status_packets();
             send_connected();
 //////////////////////////////////////////////////////////
 		if     ( Is_reg_memb_mess( service_type ) )
@@ -494,6 +533,7 @@ static void send_connected() {
     mp.packet_type = MEMB_PACKET;
     memcpy(mp.connected_servers, connected_servers, sizeof(connected_servers));
     mp.num_connected_servers = num_connected_servers;
+    memcpy(mp.servers_connected, servers_connected, sizeof(servers_connected));
     
     node *room_node = chatrooms->head;
     llist *users2;
@@ -516,4 +556,13 @@ static void send_connected() {
         SP_multicast( Mbox, SAFE_MESS, u->Private_group, 1, sizeof(mp), (char *) &mp);
         user_node = user_node->next;
     }
+}
+
+void send_status_packets() {
+    status_packet sp;
+    sp.packet_type = STATUS_PACKET;
+    memcpy(sp.machine_group, servers_connected, sizeof(servers_connected));
+    memcpy(sp.max_recvd, max_recvd, sizeof(max_recvd));
+    
+    SP_multicast( Mbox, SAFE_MESS, servers_group, 1, sizeof(sp), (char *) &sp);
 }

@@ -33,7 +33,7 @@ void add_message(chatroom * chat, packet command);
 int like_message_at(chatroom *chat, packet command);
 int unlike_message_at(chatroom *chat, packet command);
 char* get_history(chatroom *chat, int *servers_connected, char *buff);
-char* get_entire_history(chatroom *chat);
+char* get_entire_history(chatroom *chat, int *servers_connected, char *buff);
 message* get_message(chatroom* chat, int message_number);
 void add_pending_likes(chatroom *chat);
 void sort_messages(chatroom *chat);

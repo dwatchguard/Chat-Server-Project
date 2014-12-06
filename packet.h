@@ -44,6 +44,7 @@ typedef struct memb_packet
     int packet_type;
     char connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
     int num_connected_servers;
+    int servers_connected[NUM_MACHINES];
 } memb_packet;
 
 

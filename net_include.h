@@ -40,3 +40,4 @@
 
 #define CLIENT_PACKET 10
 #define MEMB_PACKET 11
+#define STATUS_PACKET 12

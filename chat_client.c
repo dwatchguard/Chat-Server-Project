@@ -287,7 +287,7 @@ static	void	User_command()
 			//	SP_error( ret );
 			//	Bye();
 			//}
-			get_entire_history(room);
+			get_entire_history(room, servers_connected, buff);
 		    break;
 		case 'v':
 			//pack.type = 'v';
@@ -411,13 +411,8 @@ static	char		 mess[MAX_MESSLEN];
 	    else if (*packet_type == MEMB_PACKET) {
 	        memb_packet *pack = (memb_packet *) mess;
 	        memcpy(connected_servers, pack->connected_servers, sizeof(connected_servers));
+	        memcpy(servers_connected, pack->servers_connected, sizeof(servers_connected));
 	        num_connected_servers = pack->num_connected_servers;
-	        for (int i = 0; i < NUM_MACHINES; i++) {
-	            servers_connected[i] = 0;
-	        }
-	        for (int i = 0; i < num_connected_servers; i++) {
-	            servers_connected[connected_servers[i][1] - '0'] = 1;
-	        }
 	    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )

@@ -155,7 +155,53 @@ char* get_history(chatroom *chat, int *servers_connected, char *buff) {
     return buff;
 }
 
-char* get_entire_history(chatroom *chat) {
+char* get_entire_history(chatroom *chat, int *servers_connected, char *buff) {
+    strcat(buff, "");
+    strcat(buff, "Room: ");
+    strcat(buff, chat->name);
+    strcat(buff, "\n");
+    strcat(buff, "Attendees: ");
+    
+    int first = 1;
+    node *user_node;
+    user *u;
+    for (int i = 0; i < NUM_MACHINES; i++) {
+        if (servers_connected[i] == 1) {
+            user_node = chat->users[i]->head;
+            for (int j = 0; j < chat->users[i]->size; j++) {
+                u = (user *) user_node->ptr;
+                if (first == 0) {
+                    strcat(buff, ", ");
+                }
+                strcat(buff, u->name);
+                user_node = user_node->next;
+            }
+        }
+    }
+    strcat(buff, ".\n");
+    char str[15];
+    char line_str[MAX_LINE_LENGTH];
+    node *message_node = chat->messages->head;
+    message *mess;
+    for (int i = 0; i < chat->messages->size; i++) {
+        mess = (message *) message_node->ptr;
+        sprintf(str, "%d", i);
+        strcat(line_str, str);
+        strcat(line_str, ". ");
+        strcat(line_str, mess->poster_name);
+        strcat(line_str, ": ");
+        strcat(line_str, mess->text);
+        for (int j = 0; j < 80 - strlen(line_str); j++) {
+            strcat(line_str, " ");
+        }
+        if (mess->num_likes > 0) {
+            strcat(line_str, "Likes: ");
+            sprintf(str, "%d", mess->num_likes);
+            strcat(line_str, str);
+        }
+        strcat(buff, line_str);
+    }
+    return buff;
 return NULL;
 }
 
