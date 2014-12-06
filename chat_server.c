@@ -62,7 +62,6 @@ static	int	    Num_sent;
 
 static  int     To_exit = 0;
 
-#define MAX_MESSLEN     102400
 #define MAX_VSSETS      10
 
 static  int     machine_num;
@@ -497,16 +496,24 @@ static void send_connected() {
     mp.num_connected_servers = num_connected_servers;
     
     node *room_node = chatrooms->head;
-    llist *users;
+    llist *users2;
+    node *user_node;
+    user *u;
     for (int i = 0; i < chatrooms->size; i++) {
         chatroom *room = (chatroom *) room_node->ptr;
-        users = room->local_users;
-        node *user_node = users->head;
-        for (int j = 0; j < users->size; j++) {
-            user *u = (user *) user_node->ptr;
+        users2 = room->local_users;
+        user_node = users2->head;
+        for (int j = 0; j < users2->size; j++) {
+            u = (user *) user_node->ptr;
             SP_multicast( Mbox, SAFE_MESS, u->Private_group, 1, sizeof(mp), (char *) &mp);
             user_node = user_node->next;
         }
         room_node = room_node->next;
+    }
+    user_node = users->head;
+    for (int i = 0; i < users->size; i++) {
+        u = (user *) user_node->ptr;
+        SP_multicast( Mbox, SAFE_MESS, u->Private_group, 1, sizeof(mp), (char *) &mp);
+        user_node = user_node->next;
     }
 }

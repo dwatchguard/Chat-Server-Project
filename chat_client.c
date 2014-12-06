@@ -182,14 +182,23 @@ static	void	User_command()
 	            printf("Select a username before connecting to a server.\n");
 	            break;
 	        }
-			ret = sscanf( &command[2], "%s", server );
-			pack.type = 'c';
-			strcpy(pack.data, username);
-			ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
-			if( ret < 0 ) 
-			{
-				SP_error( ret );
-				Bye();
+	        char temp[MAX_SERVER_NAME_LEN];
+			ret = sscanf( &command[2], "%s", temp );
+			if (strcmp(server, temp) != 0) {
+			    if (strcmp(server, "") != 0) {
+			        client_packet pack2; pack2.type = 'd';
+			        strcpy(pack.data, username);
+			        ret = SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack2), (char *) &pack2 );
+			    }
+                pack.type = 'c';
+                strcpy(pack.data, username);
+                ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
+                if( ret < 0 ) 
+                {
+                    SP_error( ret );
+                    Bye();
+                }
+                strcpy(server, temp);
 			}
 			break;
 		case 'j':
