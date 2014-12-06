@@ -64,7 +64,6 @@ static  int     To_exit = 0;
 
 #define MAX_MESSLEN     102400
 #define MAX_VSSETS      10
-#define MAX_MEMBERS     100
 
 static  int     machine_num;
 static  int     update_num = 0;
@@ -82,6 +81,7 @@ static	void	Read_message();
 static	void	Usage( int argc, char *argv[] );
 static  void	Bye();
 static  chatroom* get_chatroom(char chat_name[]);
+static void send_connected();
 
 int main( int argc, char *argv[] )
 {
@@ -399,6 +399,8 @@ static	char		 mess[MAX_MESSLEN];
                 memcpy(connected_servers, target_groups, sizeof(target_groups));
                 num_connected_servers = num_groups;
             }
+
+            send_connected();
 //////////////////////////////////////////////////////////
 		if     ( Is_reg_memb_mess( service_type ) )
 		{
@@ -486,4 +488,25 @@ static chatroom* get_chatroom(char chat_name[]) {
 		temp = temp->next;
 	}
 	return NULL;
+}
+
+static void send_connected() {
+    memb_packet mp;
+    mp.packet_type = MEMB_PACKET;
+    memcpy(mp.connected_servers, connected_servers, sizeof(connected_servers));
+    mp.num_connected_servers = num_connected_servers;
+    
+    node *room_node = chatrooms->head;
+    llist *users;
+    for (int i = 0; i < chatrooms->size; i++) {
+        chatroom *room = (chatroom *) room_node->ptr;
+        users = room->local_users;
+        node *user_node = users->head;
+        for (int j = 0; j < users->size; j++) {
+            user *u = (user *) user_node->ptr;
+            SP_multicast( Mbox, SAFE_MESS, u->Private_group, 1, sizeof(mp), (char *) &mp);
+            user_node = user_node->next;
+        }
+        room_node = room_node->next;
+    }
 }

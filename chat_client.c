@@ -61,12 +61,14 @@ static  int     To_exit = 0;
 
 #define MAX_MESSLEN     102400
 #define MAX_VSSETS      10
-#define MAX_MEMBERS     100
 
 static  char    username[MAX_USERNAME_LEN] = "";
 static  char    server[MAX_SERVER_NAME_LEN] = "";
 static  char    room_name[MAX_ROOM_NAME_LEN] = "";
 static  chatroom *room;
+
+static  char    connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
+static  int     num_connected_servers;
 
 static	void	Print_menu();
 static	void	User_command();
@@ -141,6 +143,7 @@ static	void	User_command()
 	unsigned int	mess_len;
 	int	ret;
 	int	i;
+	char    buff[MAX_MESSLEN] = "";
 	
 	client_packet   pack;
 	pack.packet_type = CLIENT_PACKET;
@@ -278,13 +281,20 @@ static	void	User_command()
 			get_entire_history(room);
 		    break;
 		case 'v':
-			pack.type = 'v';
-			ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
-			if( ret < 0 ) 
-			{
-				SP_error( ret );
-				Bye();
-			}
+			//pack.type = 'v';
+			//ret= SP_multicast( Mbox, SAFE_MESS, server, 1, sizeof(pack), (char *) &pack );
+			//if( ret < 0 ) 
+			//{
+			//	SP_error( ret );
+			//	Bye();
+			//}
+            strcat(buff, "\n");
+            for( i=0; i < num_connected_servers; i++ ) {
+                strcat(buff, "\t");
+                strcat(buff, &connected_servers[i][0]);
+                strcat(buff, "\n");
+            }
+            printf("%s", buff);
 		    break;
 
 		default:
@@ -388,6 +398,11 @@ static	char		 mess[MAX_MESSLEN];
 	    }
 	    else if (*packet_type == LEAVE_COMMAND) {
 	        remove_user(room, command->username, command->machine_num);
+	    }
+	    else if (*packet_type == MEMB_PACKET) {
+	        memb_packet *pack = (memb_packet *) mess;
+	        memcpy(connected_servers, pack->connected_servers, sizeof(connected_servers));
+	        num_connected_servers = pack->num_connected_servers;
 	    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )

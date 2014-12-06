@@ -39,5 +39,12 @@ typedef struct client_packet
 	char new_room[MAX_ROOM_NAME_LEN];//Only used for a join.
 } client_packet;
 
+typedef struct memb_packet
+{
+    int packet_type;
+    char connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
+    int num_connected_servers;
+} memb_packet;
+
 
 #endif 

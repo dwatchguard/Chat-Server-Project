@@ -20,6 +20,8 @@
 /*#define PORT       5855*/
 #define PORT         10070
 
+#define MAX_MEMBERS     100
+
 #define NUM_MACHINES 5
 #define MAX_MESS_LEN    	80
 #define MAX_USERNAME_LEN 	80
@@ -35,3 +37,4 @@
 #define LEAVE_COMMAND 4
 
 #define CLIENT_PACKET 10
+#define MEMB_PACKET 11
