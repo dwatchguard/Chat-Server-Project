@@ -218,7 +218,7 @@ static	void	User_command()
                 }
                 sscanf( &command[2], "%s", room_name);
                 room = create_room(room_name);
-                add_user(room, username);
+                //add_user(room, username); we should add ourselves to the chat through the message we receive from the server
             }
 		    break;
 		case 'a':
@@ -384,10 +384,10 @@ static	char		 mess[MAX_MESSLEN];
 	        unlike_message_at(room, *command);
 	    }
 	    else if (*packet_type == JOIN_COMMAND) {
-	        add_user(room, command->username);
+	        add_user(room, command->username, command->machine_num);
 	    }
 	    else if (*packet_type == LEAVE_COMMAND) {
-	        remove_user(room, command->username);
+	        remove_user(room, command->username, command->machine_num);
 	    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )

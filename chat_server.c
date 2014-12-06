@@ -363,10 +363,10 @@ static	char		 mess[MAX_MESSLEN];
 	                break;
 	        }
 	    } else if (*packet_type == APPEND_COMMAND){ //Then we received a message from a server
-			//packet * new_command  = (packet*) mess;
+			packet * new_command  = (packet*) mess;
 			
-			chatroom* new_room = create_room(packet->new_room);
-			add_to_end(new_room, sizeof(chatroom));
+			chatroom* new_room = create_room(new_command->room_name);
+			add_to_end(chatrooms, new_room, sizeof(chatroom));
 			
 		} else if (*packet_type == LIKE_COMMAND){ //Then we received a message from a 
 			//packet * new_command  = (packet*) mess;
@@ -376,14 +376,14 @@ static	char		 mess[MAX_MESSLEN];
 			packet * new_command  = (packet*) mess;
 			chatroom *room = get_chatroom(new_command->room_name);
 			if (room == NULL) {
-				room = create_room(pack->new_room);
+				room = create_room(new_command->room_name);
 				add_to_end(chatrooms, room, sizeof(chatroom));
 			}
-			new_user = malloc(sizeof(user));
-			memcpy(new_user, &temp_user, sizeof(user));
-			add_local_user(new_room, new_user);					
+			char new_user[MAX_USERNAME_LEN]; //we should probably malloc here
+			memcpy(new_user, new_command->username, MAX_USERNAME_LEN);
+			add_user(room, new_user, new_command->machine_num);					
 		} else if (*packet_type == LEAVE_COMMAND){ //Then we received a message from a server
-			packet * new_command  = (packet*) mess;
+			//packet * new_command  = (packet*) mess;
 		}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )
