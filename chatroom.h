@@ -7,6 +7,8 @@
 #include "net_include.h"
 #include "lamp_stamp.h"
 #include "message.h"
+
+#define RECENT_NUM 25
  
  //struct representing a chatroom
 typedef struct chatroom
@@ -30,7 +32,7 @@ llist* get_all_usernames(chatroom *chat);
 void add_message(chatroom * chat, packet command);
 int like_message_at(chatroom *chat, packet command);
 int unlike_message_at(chatroom *chat, packet command);
-char* get_history(chatroom *chat);
+char* get_history(chatroom *chat, int *servers_connected, char *buff);
 char* get_entire_history(chatroom *chat);
 message* get_message(chatroom* chat, int message_number);
 void add_pending_likes(chatroom *chat);

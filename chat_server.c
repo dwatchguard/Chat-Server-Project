@@ -108,7 +108,7 @@ int main( int argc, char *argv[] )
 	    }
 	    printf("User: connected to %s with private group %s\n", Spread_name, Private_group );
 
-        machine_num = atoi(argv[1]);
+        machine_num = atoi(argv[1]) - 1;
         ret = SP_join( Mbox, argv[1] );
         if( ret < 0 ) SP_error( ret );
         ret = SP_join( Mbox, servers_group );

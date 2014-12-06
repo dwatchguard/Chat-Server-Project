@@ -59,7 +59,6 @@ static	int	    Num_sent;
 
 static  int     To_exit = 0;
 
-#define MAX_MESSLEN     102400
 #define MAX_VSSETS      10
 
 static  char    username[MAX_USERNAME_LEN] = "";
@@ -69,6 +68,7 @@ static  chatroom *room;
 
 static  char    connected_servers[MAX_MEMBERS][MAX_GROUP_NAME];
 static  int     num_connected_servers;
+static  int     servers_connected[NUM_MACHINES];
 
 static	void	Print_menu();
 static	void	User_command();
@@ -403,6 +403,12 @@ static	char		 mess[MAX_MESSLEN];
 	        memb_packet *pack = (memb_packet *) mess;
 	        memcpy(connected_servers, pack->connected_servers, sizeof(connected_servers));
 	        num_connected_servers = pack->num_connected_servers;
+	        for (int i = 0; i < NUM_MACHINES; i++) {
+	            servers_connected[i] = 0;
+	        }
+	        for (int i = 0; i < num_connected_servers; i++) {
+	            servers_connected[connected_servers[i][1] - '0'] = 1;
+	        }
 	    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 	}else if( Is_membership_mess( service_type ) )

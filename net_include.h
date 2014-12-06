@@ -21,6 +21,7 @@
 #define PORT         10070
 
 #define MAX_MEMBERS     100
+#define MAX_MESSLEN     102400
 
 #define NUM_MACHINES 5
 #define MAX_MESS_LEN    	80
@@ -28,6 +29,7 @@
 #define MAX_ROOM_NAME_LEN 	80
 #define MAX_SERVER_NAME_LEN 80
 #define PAYLOAD     1200
+#define MAX_LINE_LENGTH     240
  
 /*Message Types*/
 #define APPEND_COMMAND 0

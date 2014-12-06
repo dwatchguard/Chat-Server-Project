@@ -1,4 +1,5 @@
 #include "chatroom.h"
+#include "net_include.h"
 
 /**
 *	Creates a chat room with the given name. handles memory allocation.
@@ -92,9 +93,68 @@ int unlike_message_at(chatroom *chat, packet command) {
 	    return 1;
 	}
 }
-char* get_history(chatroom *chat) {
-return NULL;
+char* get_history(chatroom *chat, int *servers_connected, char *buff) {
+    strcat(buff, "");
+    strcat(buff, "Room: ");
+    strcat(buff, chat->name);
+    strcat(buff, "\n");
+    strcat(buff, "Attendees: ");
+    
+    int first = 1;
+    node *user_node;
+    user *u;
+    for (int i = 0; i < NUM_MACHINES; i++) {
+        if (servers_connected[i] == 1) {
+            user_node = chat->users[i]->head;
+            for (int j = 0; j < chat->users[i]->size; j++) {
+                u = (user *) user_node->ptr;
+                if (first == 0) {
+                    strcat(buff, ", ");
+                }
+                strcat(buff, u->name);
+                user_node = user_node->next;
+            }
+        }
+    }
+    strcat(buff, ".\n");
+    char str[15];
+    char line_str[MAX_LINE_LENGTH];
+    int num_messages = RECENT_NUM;
+    node *message_node;
+    message *mess;
+    if (chat->messages->size > RECENT_NUM) {
+        message_node = chat->messages->tail;
+        for (int i = 0; i < RECENT_NUM; i++) {
+            message_node = message_node->prev;
+        }
+    }
+    else {
+        message_node = chat->messages->head;
+    }
+    if (chat->messages->size < RECENT_NUM) {
+        num_messages = chat->messages->size;
+    }
+    for (int i = 0; i < num_messages; i++) {
+        mess = (message *) message_node->ptr;
+        sprintf(str, "%d", i);
+        strcat(line_str, str);
+        strcat(line_str, ". ");
+        strcat(line_str, mess->poster_name);
+        strcat(line_str, ": ");
+        strcat(line_str, mess->text);
+        for (int j = 0; j < 80 - strlen(line_str); j++) {
+            strcat(line_str, " ");
+        }
+        if (mess->num_likes > 0) {
+            strcat(line_str, "Likes: ");
+            sprintf(str, "%d", mess->num_likes);
+            strcat(line_str, str);
+        }
+        strcat(buff, line_str);
+    }
+    return buff;
 }
+
 char* get_entire_history(chatroom *chat) {
 return NULL;
 }
